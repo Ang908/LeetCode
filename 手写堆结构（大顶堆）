@@ -1,0 +1,46 @@
+public class MyHeap {
+    int heapSize = 0;
+    int MaxSize;
+
+    public MyHeap(int size) {
+        MaxSize = size ;
+    }
+
+    public void heapInsert(int[] num) {
+        while (heapSize < MaxSize) {
+            heapSize++;
+            int curr = heapSize - 1;
+            while (num[curr] > num[(curr - 1) / 2]) {
+                swap(num, curr, (curr - 1) / 2);
+                curr = (curr - 1) / 2;
+            }
+        }
+    }
+
+    public int heapfiy(int[] num){
+        int res = num[0];
+        swap(num, 0, heapSize - 1);
+        heapSize--;
+        int curr = 0;
+        int left = curr * 2 + 1;
+        // left < heapSize 确定这个结点下面是不是还有子树
+        while(left < heapSize){
+            // left + 1 < heapSize 这是右子树存在的条件
+            int largest = left + 1 < heapSize && num[left + 1] > num[left] ? 
+                    left + 1 : left; 
+            if(num[curr] >= num[largest]){
+                break;
+            }
+            swap(num, curr, largest);
+            curr = largest;
+            left = curr * 2 + 1;
+        }
+        return  res;
+    }
+
+    public void swap(int[] num, int i, int j) {
+        int t = num[i];
+        num[i] = num[j];
+        num[j] = t;
+    }
+}
