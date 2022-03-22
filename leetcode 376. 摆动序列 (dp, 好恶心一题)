@@ -4,24 +4,29 @@ class Solution {
         if(len < 2){
             return len; 
         }
+        //dp[i] 的含义是在 [0, i] 中 最长的摆动序列
         int[] dp = new int[len];
+        // 前一个状态
         int prev = nums[1] - nums[0];
         dp[0] = 1;
         dp[1] = prev != 0 ? 2 : 1;
         for(int i = 2; i < len; i++){
+            // 当前状态
             int curr = nums[i] - nums[i-1];
+            //处理初始时重复值的情况
             if(prev == 0 && curr != 0){
                 dp[i] = dp[i - 1] + 1;
                 prev = curr;
                 continue;
             }
             if((curr > 0 && prev < 0) || (curr < 0 && prev > 0)){
+                //如果符合摆动, 处理状态转移
                 dp[i] = dp[i - 1] + 1;
                 prev = curr;
             } else {
+                //如果不符合摆动, 不处理状态转移
                 dp[i] = dp[i - 1];
             }
-            
         }
         return dp[len-1];
     }
