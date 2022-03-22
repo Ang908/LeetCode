@@ -24,7 +24,7 @@ class Solution {
                 dp[i] = dp[i - 1] + 1;
                 prev = curr;
             } else {
-                //如果不符合摆动, 不处理状态转移
+                //如果不符合摆动,认为更改当前遇到的 nums[i] 为波动序列的最后一个值
                 dp[i] = dp[i - 1];
             }
         }
