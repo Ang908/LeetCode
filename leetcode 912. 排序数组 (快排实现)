@@ -1,0 +1,40 @@
+class Solution {
+    public int[] sortArray(int[] nums) {
+        int left = 0;
+        int right = nums.length - 1;
+        quickSort(nums, left, right);
+        return nums;
+    }
+    
+    public void quickSort(int[] nums, int left, int right){
+        if(left >= right){
+            return;
+        }
+        int start = left;
+        int end = right;
+        int curr = start;
+        int index = new Random().nextInt(right - left) + left;
+        int target = nums[index];
+        while(curr <= end){
+            if(nums[curr] < target){
+                swap(nums, start, curr);
+                start++;
+                curr++;
+            } else if (nums[curr] == target){
+                curr++;
+            } else {
+                swap(nums, curr, end);
+                end--;
+            }
+        }
+        quickSort(nums, left, start - 1);
+        quickSort(nums, end + 1, right);
+        
+    }
+    
+    public void swap(int[] nums, int i, int j){
+        int t = nums[i];
+        nums[i] = nums[j];
+        nums[j] = t;
+    }
+}
