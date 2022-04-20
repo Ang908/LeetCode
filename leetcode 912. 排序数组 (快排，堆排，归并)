@@ -1,3 +1,4 @@
+# 快排
 class Solution {
     public int[] sortArray(int[] nums) {
         int left = 0;
@@ -39,6 +40,7 @@ class Solution {
     }
 }
 ===================================================================
+# 堆排
 class Solution {
     public int[] sortArray(int[] nums) {
         MyHeap myHeap = new MyHeap(nums);
@@ -107,6 +109,7 @@ class MyHeap {
     }
 }
 =====================================================
+# 归并
 class Solution {
     public int[] sortArray(int[] nums) {
         mergeSort(nums, 0, nums.length - 1);
