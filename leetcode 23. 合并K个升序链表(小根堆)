@@ -1,0 +1,85 @@
+class Solution {
+    public ListNode mergeKLists(ListNode[] lists) {
+        // 预处理空链表
+        List<ListNode> list = new ArrayList();
+        for(ListNode node : lists){
+            if(node != null){
+                list.add(node);
+            }
+        }
+        ListNode[] newArr = new ListNode[list.size()];
+        for(int i = 0; i < newArr.length; i++){
+            newArr[i] = list.get(i);
+        }
+        lists = newArr;
+
+        ListNode dummy = new ListNode();
+        MyHeap myHeap = new MyHeap(lists);
+        ListNode cur = dummy;
+        while(myHeap.size != 0){
+            cur.next = myHeap.getMin();
+            cur = cur.next;
+        }
+        return dummy.next;
+    }
+}
+
+class MyHeap {
+    ListNode[] lists;
+    int size;
+
+    public MyHeap(ListNode[] lists) {
+        this.lists = lists;
+        size = 0;
+        for (int i = 0; i < lists.length; i++) {
+            size++;
+            heapInsert(lists, i);
+        }
+    }
+
+    public ListNode getMin() {
+        ListNode res = lists[0];
+        lists[0] = lists[0].next;
+        if (lists[0] == null) {
+            swap(lists, 0, --size);
+        }
+        heapfiy(lists, 0);
+        return res;
+    }
+
+    public void heapInsert(ListNode[] lists, int idx) {
+        if (idx >= size) {
+            return;
+        }
+        while (lists[(idx - 1) / 2].val > lists[idx].val) {
+            swap(lists, (idx - 1) / 2, idx);
+            idx = (idx - 1) / 2;
+        }
+    }
+
+    public void heapfiy(ListNode[] lists, int idx) {
+        if (idx >= size) {
+            return;
+        }
+        while (true) {
+            int left = idx * 2 + 1;
+            if (left >= size) {
+                break;
+            }
+            int right = left + 1 < size ? left + 1 : -1;
+            int largest = right != -1 && lists[right].val < lists[left].val ? right : left;
+            if (lists[largest].val < lists[idx].val) {
+                swap(lists, largest, idx);
+                idx = largest;
+            } else {
+                break;
+            }
+        }
+    }
+
+    public void swap(ListNode[] lists, int i, int j) {
+        ListNode t = lists[i];
+        lists[i] = lists[j];
+        lists[j] = t;
+    }
+}
