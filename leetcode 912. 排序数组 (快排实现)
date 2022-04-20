@@ -38,3 +38,109 @@ class Solution {
         nums[j] = t;
     }
 }
+===================================================================
+class Solution {
+    public int[] sortArray(int[] nums) {
+        MyHeap myHeap = new MyHeap(nums);
+        myHeap.sort();
+        return nums;
+    }
+}
+
+
+class MyHeap {
+    int[] nums;
+    int size;
+
+
+    public MyHeap(int[] nums) {
+        this.nums = nums;
+        size = 0;
+        for (int i = 0; i < nums.length; i++) {
+            size++;
+            heapInsert(nums, i);
+        }
+    }
+
+    public void sort() {
+        for (size--; size >= 0; size--) {
+            swap(nums, 0, size);
+            heapfiy(nums, 0);
+        }
+    }
+
+    public void heapInsert(int[] nums, int idx) {
+        if (idx >= size) {
+            return;
+        }
+        while (nums[(idx - 1) / 2] < nums[idx]) {
+            swap(nums, (idx - 1) / 2, idx);
+            idx = (idx - 1) / 2;
+        }
+    }
+
+    public void heapfiy(int[] nums, int idx) {
+        if (idx >= size) {
+            return;
+        }
+        while (true) {
+            int left = idx * 2 + 1;
+            if(left >= size){
+                break;
+            }
+            int right = left + 1 < size ? left + 1 : -1;
+            int largest = right != -1 && nums[right] > nums[left] ? right : left;
+            if (nums[largest] > nums[idx]) {
+                swap(nums, largest, idx);
+                idx = largest;
+            } else {
+                break;
+            }
+        }
+    }
+
+
+    public void swap(int[] nums, int i, int j) {
+        int t = nums[i];
+        nums[i] = nums[j];
+        nums[j] = t;
+    }
+}
+=====================================================
+class Solution {
+    public int[] sortArray(int[] nums) {
+        mergeSort(nums, 0, nums.length - 1);
+        return nums;
+    }
+    
+    public void mergeSort(int[] nums, int left, int right) {
+        if (left == right) {
+            return;
+        }
+        int mid = left + (right - left) / 2;
+        mergeSort(nums, left, mid);
+        mergeSort(nums, mid + 1, right);
+        merge(nums, left, mid, right);
+    }
+
+    public void merge(int[] nums, int left, int mid, int right) {
+        int[] help = new int[right - left + 1];
+        int p1 = left;
+        int p2 = mid + 1;
+        int cur = 0;
+        while (p1 <= mid && p2 <= right) {
+            if (nums[p1] > nums[p2]) {
+                help[cur++] = nums[p2++];
+            } else {
+                help[cur++] = nums[p1++];
+            }
+        }
+        while (p1 <= mid) {
+            help[cur++] = nums[p1++];
+        }
+        while (p2 <= right) {
+            help[cur++] = nums[p2++];
+        }
+        System.arraycopy(help, 0, nums, left + 0, help.length);
+    }
+}
