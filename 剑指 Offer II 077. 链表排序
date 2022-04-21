@@ -1,0 +1,59 @@
+class Solution {
+    public ListNode sortList(ListNode head) {
+        // head == null 是对于空链表的处理 
+        // head.next == null 是对于进来的链表只剩下一个元素,那么这个链表已经有序了
+        if(head == null || head.next == null){
+            return head;
+        }
+        ListNode slow = head;
+        ListNode fast = head;
+        ListNode prev = null;
+        // 找到链表中点，这里维护的 prev 变量用来循环结束时对于链表的断链
+        while(fast != null && fast.next != null){
+            prev = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        } 
+        // 链表的断链
+        prev.next = null;
+        // 复用 head 和 slow 这两个变量
+        // 对两条新链表递归地执行sortList之后可以得到两条有序的链表
+        head = sortList(head);
+        slow = sortList(slow);
+        // 在得到两条有序链表后开始合并
+        return merge(head, slow);
+    }
+
+    public ListNode merge(ListNode head, ListNode mid){
+        ListNode res = new ListNode();
+        ListNode cur = res;
+        while(head != null && mid != null){
+            if(head.val <= mid.val){
+                cur.next = head;
+                cur = cur.next;
+                head = head.next;
+            } else {
+                cur.next = mid;
+                cur = cur.next;
+                mid = mid.next;
+            }
+        }
+        if(head != null){
+            cur.next = head;
+        }
+        if(mid != null){
+            cur.next = mid;
+        }
+        // while(head != null){
+        //     cur.next = head;
+        //     cur = cur.next;
+        //     head = head.next;
+        // }
+        // while(mid != null){
+        //     cur.next = mid;
+        //     cur = cur.next;
+        //     mid = mid.next;            
+        // }
+        return res.next;
+    }
+}
