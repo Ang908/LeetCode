@@ -1,0 +1,73 @@
+class Solution {
+    public int networkDelayTime(int[][] times, int n, int k) {
+        List<List<int[]>> adj = new ArrayList<>(n + 1);
+        for(int i = 0; i <= n; i++){
+            adj.add(new ArrayList<>());
+        }
+        for(int i = 0; i < times.length; i++){
+            int[] cur = times[i];
+            List<int[]> list = adj.get(cur[0]);
+            // 构造一个邻接表,储存的是数组,arr[0]表示邻居,
+            // arr[1]表示从cur到arr[1]的这条边的权重
+            list.add(new int[]{cur[1], cur[2]});
+        }
+        // 以二维数组的形式构造一个储存信息的表,
+        // arr[0]表示从起点到当前点的最小权值,
+        // arr[1]表示该点的上一个节点,记录下从那个点到当前点所付出的代价最小
+        int[][] info = new int[n + 1][2];
+        for(int i = 0; i <= n; i++){
+            // 对于未知的节点,初始化权重为无穷大
+            info[i][0] = Integer.MAX_VALUE;
+        }
+        Deque<Integer> queue = new LinkedList<>();
+        queue.add(k);
+        // 起点的权重为0,上一个节点设置为本身
+        info[k][0] = 0;
+        info[k][1] = k;
+        // 记录下从起点出发,到达哪些节点已经找到了最优的路径
+        boolean[] visited = new boolean[n + 1]; 
+        while(!queue.isEmpty()){
+            int cur = queue.poll();
+            // 从队列中弹出即认为找到了最优路径
+            visited[cur] = true;
+            // 拿到当前节点的所有邻居
+            List<int[]> curAdj = adj.get(cur);
+            for(int[] arr : curAdj){
+                // 从当前节点到他的某一个邻居节点
+                // 如果找到了一条更优的路径就更新权重
+                // 以及将到达该节点的上一个节点设置为当前节点
+                if(arr[1] + info[cur][0] < info[arr[0]][0]){
+                    info[arr[0]][0] = arr[1] + info[cur][0];
+                    info[arr[0]][1] = cur;
+                }
+            }
+            int next = 0;
+            for(int i = 1; i <= n; i++){
+                // 从还没有确定最优路径的点中挑选到目前为止权重最小的点
+                if(!visited[i] && info[i][0] < info[next][0]){
+                    next = i;
+                }
+            }
+            if(next != 0){
+                // 将还没有确定最优路径的到目前为止权重最小的点加入队列
+                queue.add(next);
+            }
+        }
+        int res = 0;
+        int maxIndex = 0;
+        for(int i = 1; i <= n; i++){
+            if(info[i][0] > res){
+                res = info[i][0];
+                maxIndex = i;
+            }
+        }
+        // 如果需要打印路径的话,可以通过维护的上一个点一直往上追溯到起点
+        // int curIndex = maxIndex;
+        // while(curIndex != k){
+        //     System.out.println(curIndex);
+        //     curIndex = info[curIndex][1];
+        // }
+        // System.out.println(curIndex);
+        return res == Integer.MAX_VALUE ? -1 : res;
+    }
+}
