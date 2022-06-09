@@ -1,0 +1,71 @@
+
+// 往上指的图结构
+public class UnionFindSet<V> {
+
+
+    // 把元素包一层
+    private class Element<T> {
+        T val;
+
+        Element(T val) {
+            this.val = val;
+        }
+    }
+
+    // 每个原始的值能找到包了一层之后的元素，一一对应
+    Map<V, Element<V>> elementMap;
+    // key 为每个元素 val 为他的代表元素
+    Map<Element<V>, Element<V>> fatherMap;
+    // key 某个集合的代表元素, val 为该集合的大小
+    Map<Element<V>, Integer> sizeMap;
+
+    public UnionFindSet(List<V> list) {
+        this.elementMap = new HashMap<>();
+        this.fatherMap = new HashMap<>();
+        this.sizeMap = new HashMap<>();
+        for (V val : list) {
+            Element<V> element = new Element<>(val);
+            elementMap.put(val, element);
+            fatherMap.put(element, element);
+            sizeMap.put(element, 1);
+        }
+    }
+
+    public Element<V> findHead(Element<V> element) {
+        Deque<Element<V>> stack = new LinkedList<>();
+        while (fatherMap.get(element) != element) {
+            stack.push(element);
+            element = fatherMap.get(element);
+        }
+        while (!stack.isEmpty()) {
+            Element<V> pop = stack.pop();
+            fatherMap.put(pop, element);
+        }
+        return element;
+    }
+
+    public boolean isSameSet(V a, V b) {
+        if (elementMap.containsKey(a) && elementMap.containsKey(b)) {
+            return findHead(elementMap.get(a)) == findHead(elementMap.get(b));
+        }
+
+        return false;
+
+    }
+
+    public void union(V a, V b) {
+        if (elementMap.containsKey(a) && elementMap.containsKey(b)) {
+            Element<V> aHead = findHead(elementMap.get(a));
+            Element<V> bHead = findHead(elementMap.get(b));
+            if (aHead != bHead) {
+                Integer aSize = sizeMap.get(aHead);
+                Integer bSize = sizeMap.get(bHead);
+                Element<V> smail = aSize < bSize ? aHead : bHead;
+                Element<V> big = aSize >= bSize ? aHead : bHead;
+                fatherMap.put(smail, big);
+                sizeMap.put(big, sizeMap.get(big) + sizeMap.get(smail));
+                sizeMap.remove(smail);
+            }
+        }
+    }
+}
