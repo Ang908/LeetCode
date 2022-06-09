@@ -1,0 +1,165 @@
+public class SegmentTree {
+    private int maxSize;
+    private int[] arr;          // 原始信息
+    private int[] sum;          // 区间和
+    private int[] lazy;         // 懒添加标记
+    private int[] change;       // 更新后的实际值
+    private boolean[] update;   // 懒更新标记
+
+    public SegmentTree(int[] origin) {
+        maxSize = origin.length + 1;
+        arr = new int[maxSize]; // 0位置弃用， 下标从1开始
+        for (int i = 1; i < maxSize; i++) {
+            arr[i] = origin[i - 1];
+        }
+        sum = new int[maxSize << 2];
+        lazy = new int[maxSize << 2];
+        change = new int[maxSize << 2];
+        update = new boolean[maxSize << 2];
+    }
+
+
+    public long query(int L, int R, int left, int right, int rootIndex) {
+        if (L <= left && R >= right) {
+            return sum[rootIndex];
+        }
+        int mid = left + (right - left) / 2;
+        pushDown(rootIndex, mid - left + 1, right - mid);
+        long res = 0;
+        if (L <= mid) {
+            res += query(L, R, left, mid, rootIndex << 1);
+        }
+        if (R > mid) {
+            res += query(L, R, mid + 1, right, rootIndex << 1 | 1);
+
+        }
+
+        return res;
+    }
+
+
+    /**
+     * @param rootIndex sum[rootIndex] 代表了 arr 中 left 到 right 这个范围的区间和
+     * @param left      区间左边界
+     * @param right     区间右边界
+     */
+    public void buildTree(int rootIndex, int left, int right) {
+        if (left == right) {
+            sum[rootIndex] = arr[left];
+            return;
+        }
+        int mid = left + ((right - left) >> 1);
+        int leftChildIndex = rootIndex << 1;
+        int rightChildIndex = rootIndex << 1 | 1;
+        buildTree(leftChildIndex, left, mid);
+        buildTree(rightChildIndex, mid + 1, right);
+        pushUp(rootIndex);
+    }
+
+    public void pushUp(int rootIndex) {
+        int leftChildIndex = rootIndex << 1;
+        int rightChildIndex = rootIndex << 1 | 1;
+        sum[rootIndex] = sum[leftChildIndex] + sum[rightChildIndex];
+    }
+
+
+    /**
+     * @param L         任务范围
+     * @param R         任务范围
+     * @param C         L 到 R 这个任务范围 全加上 C
+     * @param left      传递到当前下标时，当前下标实际代表的范围
+     * @param right     传递到当前下标时，当前下标实际代表的范围
+     * @param rootIndex 当前下标
+     */
+    public void add(int L, int R, int C,
+                    int left, int right, int rootIndex) {
+        // 任务范围包含了当前下标代表的实际范围, 懒添加
+        if (L <= left && R >= right) {
+            lazy[rootIndex] += C;
+            sum[rootIndex] += C * (right - left + 1);
+            return;
+        }
+        // 没有包含,需要下发
+        int mid = left + (right - left) / 2;
+        pushDown(rootIndex, mid - left + 1, right - mid);
+        if (L <= mid) {
+            add(L, R, C, left, mid, rootIndex << 1);
+        }
+        if (R > mid) {
+            add(L, R, C, mid + 1, right, rootIndex << 1 | 1);
+        }
+        // 在将任务下发到孩子节点完成后要更新当前节点的值
+        pushUp(rootIndex);
+    }
+
+
+    /**
+     * @param rootIndex 将当前节点拦住的 懒更新 和 懒添加 任务下发给两个孩子节点
+     * @param leftNode  当前节点的左孩子节点代表的区间数量
+     * @param rightNode 当前节点的右孩子节点代表的区间数量
+     */
+    public void pushDown(int rootIndex, int leftNode, int rightNode) {
+
+        if (update[rootIndex]) {
+            // 如果父节点有懒更新, 就下发给两个孩子
+            int leftChild = rootIndex << 1;
+            int rightChild = rootIndex << 1 | 1;
+
+            update[leftChild] = true;
+            update[rightChild] = true;
+
+            change[leftChild] = change[rootIndex];
+            change[rightChild] = change[rootIndex];
+
+            lazy[leftChild] = 0;
+            lazy[rightChild] = 0;
+
+            sum[leftChild] = change[leftChild] * leftNode;
+            sum[rightChild] = change[rightChild] * rightNode;
+
+            update[rootIndex] = false;
+        }
+
+        if (lazy[rootIndex] != 0) {
+            int leftChild = rootIndex << 1;
+            lazy[leftChild] += lazy[rootIndex];
+            sum[leftChild] += lazy[leftChild] * leftNode;
+            int rightChild = rootIndex << 1 | 1;
+            lazy[rightChild] += lazy[rootIndex];
+            sum[rightChild] += lazy[rightChild] * rightNode;
+            lazy[rootIndex] = 0;
+        }
+    }
+
+
+    /**
+     * @param L         任务范围
+     * @param R         任务范围
+     * @param C         L 到 R 这个任务范围的值全部变成 C
+     * @param left      传递到当前下标时，当前下标实际代表的范围
+     * @param right     传递到当前下标时，当前下标实际代表的范围
+     * @param rootIndex 当前下标
+     */
+    public void update(int L, int R, int C,
+                       int left, int right, int rootIndex) {
+        // 任务范围包含了当前下标代表的实际范围, 懒更新
+        if (L <= left && R >= right) {
+            update[rootIndex] = true;
+            change[rootIndex] = C;
+            sum[rootIndex] = C * (right - left + 1);
+            lazy[rootIndex] = 0;
+            return;
+        }
+        // 没有包含,需要下发
+        int mid = left + (right - left) / 2;
+        pushDown(rootIndex, mid - left + 1, right - mid);
+        if (L <= mid) {
+            update(L, R, C, left, mid, rootIndex << 1);
+        }
+        if (R > mid) {
+            update(L, R, C, mid + 1, right, rootIndex << 1 | 1);
+        }
+        // 在将任务下发到孩子节点完成后要更新当前节点的值
+        pushUp(rootIndex);
+    }
+}
