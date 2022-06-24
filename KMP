@@ -1,0 +1,59 @@
+
+public class KMP {
+
+    public static void main(String[] args) {
+        String str1 = "auygfowifhauygfowifh1";
+        String str2 = "auygfowifh1";
+        System.out.println("my indexOf:" + indexOf(str1, str2));
+        System.out.println("String indexOf:" + str1.indexOf(str2));
+    }
+
+    public static int indexOf(String str1, String str2) {
+        if (str1 == null || str2 == null || str1.length() < str2.length()) {
+            return -1;
+        }
+        if (str2.equals("")) {
+            return 0;
+        }
+        int p1 = 0;
+        int p2 = 0;
+        int[] next = getNext(str2);
+        while (p1 < str1.length() && p2 < str2.length()) {
+            char c1 = str1.charAt(p1);
+            char c2 = str2.charAt(p2);
+            if (c1 == c2) {
+                p1++;
+                p2++;
+            } else if (p2 == 0) {
+                p1++;
+            } else {
+                p2 = next[p2];
+            }
+        }
+        return p2 == str2.length() ? p1 - p2 : -1;
+    }
+
+    public static int[] getNext(String str2) {
+        if (str2.length() <= 2) {
+            int[] res = new int[str2.length()];
+            res[0] = -1;
+            return res;
+        }
+        char[] chars = str2.toCharArray();
+        int[] next = new int[chars.length];
+        next[0] = -1;
+        int cur = 2;
+        while (cur < chars.length) {
+            int t = cur - 1;
+            while (true) {
+                if (t == 0 || chars[cur - 1] == chars[next[t]]) {
+                    next[cur] = next[t] + 1;
+                    break;
+                }
+                t = next[t];
+            }
+            cur++;
+        }
+        return next;
+    }
+}
